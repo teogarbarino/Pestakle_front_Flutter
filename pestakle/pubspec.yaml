@@ -1,0 +1,56 @@
+name: pestakle
+description: "A new Flutter project."
+# Empêche la publication accidentelle sur pub.dev (garde "none" si privé)
+publish_to: "none"
+
+# Définition de la version de l'application
+version: 1.0.0+1
+
+# Définir la version de l'environnement SDK Dart
+environment:
+  sdk: ">=3.3.3 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Icônes Cupertino pour les styles iOS
+  cupertino_icons: ^1.0.6
+
+  # Librairies supplémentaires
+  image_picker: ^1.1.2 # Pour sélectionner des images dans la galerie ou la caméra
+  provider: ^6.1.2 # Gestion d'état (state management)
+  geolocator: ^13.0.1 # Pour accéder aux données de géolocalisation
+  socket_io_client: ^3.0.1 # Client Socket.IO pour le temps réel
+  shared_preferences: ^2.2.1 # Stockage persistant local
+  http: ^1.1.0 # Requêtes HTTP
+  flutter_staggered_grid_view: ^0.7.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Recommandations pour de bonnes pratiques de code
+  flutter_lints: ^3.0.0
+
+# Section spécifique à Flutter
+flutter:
+  uses-material-design: true
+
+  # Définir les assets (images, fichiers, etc.)
+  assets:
+    - assets/667.webp # Chemin d'accès à votre fichier image (assurez-vous que ce fichier existe)
+    - assets/wwow.gif
+    - assets/zuukou-667.gif
+    - assets/667logo.jpg
+    - assets/drake.jpeg
+    - assets/kendrick.jpeg
+    - assets/scarlet.jpeg
+    - assets/pub.gif
+# Fonts customisées (décommenter et configurer si nécessaire)
+# fonts:
+#   - family: Schyler
+#     fonts:
+#       - asset: fonts/Schyler-Regular.ttf
+#       - asset: fonts/Schyler-Italic.ttf
+#         style: italic
