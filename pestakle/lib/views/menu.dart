@@ -4,6 +4,7 @@
 // Flutter Imports
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pestakle/components/drawer.dart';
 import 'package:provider/provider.dart';
 import 'package:pestakle/controllers/provider/index_provider.dart';
 import 'package:pestakle/controllers/provider/user_provider.dart';
@@ -55,7 +56,7 @@ class MainPage extends StatelessWidget {
               ? appBarAccount(widthScreen, context, pUser.getUser.photo!)
               : null,
           // Def du BottomNavigationBar
-          // drawer: const Menu(),
+           drawer: CustomDrawer (),
           bottomNavigationBar: BottomNavigationBar(
             selectedItemColor: Colors.white,
             unselectedItemColor: Colors.white,
@@ -64,6 +65,7 @@ class MainPage extends StatelessWidget {
             showUnselectedLabels: true,
             currentIndex: currentScreenIndex,
             onTap: (value) => screenindexprovider.updateScreenIndex(value),
+        
             // Liste des items du BottomNavigationBar
             items: [
               BottomNavigationBarItem(

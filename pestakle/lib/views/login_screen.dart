@@ -191,7 +191,7 @@ class _LoginPageState extends State<LoginPage> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => RandomBentoGrid()));
+                                builder: (context) => const RandomBentoGrid()));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black, // Background color

@@ -11,15 +11,13 @@ class DetailPage extends StatelessWidget {
       appBar: AppBar(title: Text(item["brand"])),
       body: Column(
         children: [
-          Hero(
-            tag: "hero-${item['id']}",
-            child: Image.asset(
+           Image.asset(
               item["path"],
               width: double.infinity,
               fit: BoxFit.cover,
               height: 300,
             ),
-          ),
+          
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(

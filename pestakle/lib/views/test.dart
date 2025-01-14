@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:pestakle/components/dynamicCategorie.dart';
 import 'dart:math';
 
 import 'package:pestakle/views/details_screen.dart';
+
+// Enum pour définir les filtres disponibles
+enum FilterType { userName, brand, priceRange, condition }
 
 class RandomBentoGrid extends StatefulWidget {
   const RandomBentoGrid({super.key});
@@ -11,311 +15,237 @@ class RandomBentoGrid extends StatefulWidget {
   _RandomBentoGridState createState() => _RandomBentoGridState();
 }
 
-class _RandomBentoGridState extends State<RandomBentoGrid>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+class _RandomBentoGridState extends State<RandomBentoGrid> {
   final Random random = Random();
 
+  // Liste complète des éléments
   final List<Map<String, dynamic>> items = [];
-  void _generateItemsWithAds() {
-    int nextAdIndex =
-        random.nextInt(26) + 5; // Compteur initial pour la première pub
+  // Liste visible (après application de filtres/recherche)
+  List<Map<String, dynamic>> visibleItems = [];
 
-    for (int i = 0; i < 100; i++) {
-      // Ajoute une publicité à l'index défini
-      if (i == nextAdIndex) {
-        items.add({
-          "type": "ad",
-          "path": "assets/pub.gif", // Image de publicité
-        });
-        nextAdIndex +=
-            random.nextInt(20) + 5; // Détermine l'index pour la prochaine pub
-      }
-
-      // Ajoute un élément normal
-      items.add({
-        "type": "item",
-        "path": i % 3 == 0
-            ? "assets/667logo.jpg"
-            : (i % 3 == 1 ? "assets/wwow.gif" : "assets/zuukou-667.gif"),
-        "userImage": "assets/kendrick.jpeg",
-        "userName": "Zuukou 667",
-        "brand": "Supreme",
-        "condition": "Neuf",
-        "sizeLabel": "L",
-        "price": random.nextDouble() * 100 + 10,
-        "shippingPrice": random.nextDouble() * 10 + 5,
-      });
-    }
-  }
+  // Map pour gérer l'état actif des filtres
+  Map<FilterType, bool> activeFilters = {
+    FilterType.userName: false,
+    FilterType.brand: false,
+    FilterType.priceRange: false,
+    FilterType.condition: false,
+  };
 
   @override
   void initState() {
     super.initState();
-    _generateItemsWithAds();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    )..forward();
+    _generateItems();
+    visibleItems = List.from(items); // Initialisation
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  // Générer une liste de données avec des champs aléatoires
+  void _generateItems() {
+    for (int i = 0; i < 50; i++) {
+      items.add({
+        "userName": _generateRandomString(8),
+        "brand": i % 2 == 0 ? "Supreme" : "Nike",
+        "price": random.nextDouble() * 100 + 10,
+        "sizeLabel": i % 2 == 0 ? "M" : "L",
+        "condition": i % 3 == 0 ? "Neuf" : "Usé",
+        "path": "assets/667logo.jpg",
+      });
+    }
+  }
+
+  // Générer une chaîne aléatoire pour les noms
+  String _generateRandomString(int length) {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    return List.generate(length, (index) => chars[random.nextInt(chars.length)])
+        .join();
+  }
+
+  // Appliquer les filtres actifs
+  void _applyFilters() {
+    setState(() {
+      visibleItems = items.where((item) {
+        if (activeFilters[FilterType.userName]! &&
+            !(item["userName"]?.toLowerCase().contains("a") ?? false)) {
+          return false;
+        }
+        if (activeFilters[FilterType.brand]! &&
+            item["brand"] != "Supreme") return false;
+        if (activeFilters[FilterType.priceRange]! &&
+            (item["price"] < 50 || item["price"] > 100)) return false;
+        if (activeFilters[FilterType.condition]! &&
+            item["condition"] != "Neuf") return false;
+        return true;
+      }).toList();
+    });
+  }
+
+  // Basculer l'état d'un filtre
+  void _toggleFilter(FilterType filter) {
+    setState(() {
+      activeFilters[filter] = !activeFilters[filter]!;
+      _applyFilters();
+    });
+  }
+
+  // Filtrer les éléments en fonction de la recherche
+  void _filterItems(String query) {
+    setState(() {
+      visibleItems = items.where((item) {
+        final userNameMatch = item["userName"]
+                ?.toLowerCase()
+                .contains(query.toLowerCase()) ??
+            false;
+        return userNameMatch;
+      }).toList();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Largeur de l'écran
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // Nombre de colonnes basé sur la largeur de l'écran
     final int crossAxisCount = screenWidth > 1200
-        ? 6 // 6 colonnes pour les très grands écrans
-        : (screenWidth > 800
-            ? 4
-            : 2); // 4 colonnes pour tablettes, 2 pour mobiles
-
-    // Taille des cartes adaptée aux colonnes
-    final List<double> cardHeights = [
-      200.0 + 50.0 / crossAxisCount,
-      250.0 + 50.0 / crossAxisCount,
-      300.0 + 50.0 / crossAxisCount
-    ];
+        ? 6
+        : (screenWidth > 800 ? 4 : 2);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Responsive Bento Grid"),
+        title: const Text("Searchable Grid with Filters"),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: MasonryGridView.count(
-          crossAxisCount: crossAxisCount, // Nombre de colonnes dynamiques
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-          itemCount: items.length,
-          itemBuilder: (context, index) {
-            final item = items[index];
-            final double height =
-                cardHeights[random.nextInt(cardHeights.length)];
-
-            if (item["type"] == "ad") {
-              return _buildAdCard(item["path"], height);
-            } else {
-              return _buildItemCard(item, height, context);
-            }
-          },
-        ),
-      ),
-    );
-  }
-}
-
-Widget _buildAdCard(String path, double height) {
-  return SizedBox(
-    height: height, // Taille fixe pour la publicité
-    child: Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      clipBehavior: Clip.antiAlias,
-      child: Image.asset(
-        path,
-        fit: BoxFit.cover,
-        width: double.infinity,
-      ),
-    ),
-  );
-}
-
-class AnimatedGridItem extends StatelessWidget {
-  final Widget child;
-  final Animation<double> animation;
-
-  const AnimatedGridItem({
-    super.key,
-    required this.child,
-    required this.animation,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: animation.value,
-          child: Opacity(
-            opacity: animation.value,
-            child: child,
+      body: Column(
+        children: [
+          // Barre de recherche
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            
+            child: TextField(
+              onChanged: _filterItems, // Filtrer lors de la saisie
+              decoration: InputDecoration(
+                hintText: 'Search by name...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+            ),
           ),
-        );
-      },
-      child: child,
+          // Filtres dynamiques
+         Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+  child: SizedBox(
+    height: 100, // Hauteur pour les catégories dynamiques
+    child: DynamicCategories(
+     onCategoriesChanged: (filters) {
+  setState(() {
+    visibleItems = items.where((item) {
+      if ((filters[FilterType.userName.index] ?? false) &&
+          !(item["userName"]?.contains('a') ?? false)) {
+        return false;
+      }
+      if ((filters[FilterType.brand.index] ?? false) &&
+          item["brand"] != "Supreme") {
+        return false;
+      }
+      if ((filters[FilterType.priceRange.index] ?? false) &&
+          (item["price"] < 50 || item["price"] > 100)) {
+        return false;
+      }
+      if ((filters[FilterType.condition.index] ?? false) &&
+          item["condition"] != "Neuf") {
+        return false;
+      }
+      return true;
+    }).toList();
+  });
+},
+    ),
+  ),
+),
+          // Grille des éléments
+          Expanded(
+            child: MasonryGridView.count(
+              crossAxisCount: crossAxisCount,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              itemCount: visibleItems.length,
+              itemBuilder: (context, index) {
+                final item = visibleItems[index];
+                return GestureDetector(onTap: () {
+    // Navigue vers la page de détail
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetailPage(item: item),
+      ),
     );
-  }
-}
-
-Widget _buildItemCard(Map<String, dynamic> item, height, BuildContext context) {
-  return GestureDetector(
-    onTap: () {
-      Navigator.push(
-        context,
-        PageRouteBuilder(
-          transitionDuration:
-              const Duration(milliseconds: 1000), // Durée plus lente
-          pageBuilder: (context, animation, secondaryAnimation) {
-            return FadeTransition(
-              opacity: animation,
-              child: DetailPage(item: item),
-            );
-          },
+  },
+  onLongPress: (){
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
-      );
-    },
-    child: SizedBox(
-      height: height,
-      child: Card(
-        elevation: 6,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Header avec l'utilisateur
-            Flexible(
-              flex: 2, // 20% de la hauteur totale pour le profil
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: height * 0.08,
-                      backgroundImage: AssetImage(item["userImage"]),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          item["userName"],
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 1,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            // Image ou GIF
-            Flexible(
-              flex: 6, // 60% de la hauteur totale pour l'image
-              child: Hero(
-                tag: "hero-${item['id']}",
-                child: Image.asset(
-                  item["path"],
-                  fit: BoxFit.fill,
-                  width: double.infinity,
-                ),
-              ),
-            ),
-            // Informations sur le produit
-            Flexible(
-              flex: 4, // 40% de la hauteur totale pour les informations
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Flexible(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          item["brand"],
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                          maxLines: 1,
-                        ),
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              "État : ${item["condition"]}",
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                              maxLines: 1,
-                            ),
-                          ),
-                        ),
-                        Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              "Taille :  ${item["sizeLabel"]}",
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                              maxLines: 1,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              "${item["price"].toStringAsFixed(2)} €",
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                              maxLines: 1,
-                            ),
-                          ),
-                        ),
-                        Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              "Livraison : ${item["shippingPrice"].toStringAsFixed(2)} €",
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                              maxLines: 1,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Image.asset(
+            item["path"],
+            fit: BoxFit.contain,
+          ),
         ),
       ),
-    ),
-  );
+    );
+  },
+                  child: _buildItemCard(item));
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget pour afficher les filtres sous forme de chips
+  Widget _buildFilterChip(FilterType filter, String label) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: activeFilters[filter]!,
+      onSelected: (_) => _toggleFilter(filter),
+      selectedColor: Colors.blue,
+      backgroundColor: Colors.grey[200],
+    );
+  }
+
+  // Widget pour afficher un élément sous forme de carte
+  Widget _buildItemCard(Map<String, dynamic> item) {
+    return Card(
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Column(
+        children: [
+          Image.asset(
+            item["path"],
+            fit: BoxFit.cover,
+            height: 150,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "User: ${item["userName"]}",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text("Brand: ${item["brand"]}"),
+                Text("Size: ${item["sizeLabel"]}"),
+                Text("Price: ${item["price"].toStringAsFixed(2)} €"),
+                Text("Condition: ${item["condition"]}"),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

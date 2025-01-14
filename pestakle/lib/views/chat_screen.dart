@@ -80,7 +80,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void _scrollToBottom() {
     _scrollController.animateTo(
       _scrollController.position.maxScrollExtent,
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
     );
   }
@@ -92,10 +92,10 @@ class _ChatScreenState extends State<ChatScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Nouvelle conversation'),
+          title: const Text('Nouvelle conversation'),
           content: DropdownButton<User>(
             value: selectedUser,
-            hint: Text('Sélectionner un utilisateur'),
+            hint: const Text('Sélectionner un utilisateur'),
             items: allUsers.map((User user) {
               return DropdownMenuItem<User>(
                 value: user,
@@ -108,11 +108,11 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Annuler'),
+              child: const Text('Annuler'),
               onPressed: () => Navigator.pop(context),
             ),
             TextButton(
-              child: Text('Créer'),
+              child: const Text('Créer'),
               onPressed: () async {
                 if (selectedUser != null) {
                   final response = await HttpService().makePostRequestWithToken(
@@ -139,10 +139,10 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Messages'),
+        title: const Text('Messages'),
         actions: [
           IconButton(
-            icon: Icon(Icons.add),
+            icon: const Icon(Icons.add),
             onPressed: _showCreateConversationDialog,
           ),
         ],
@@ -184,19 +184,19 @@ class _ChatScreenState extends State<ChatScreen> {
                 // Messages
                 Expanded(
                   child: selectedConversation == null
-                      ? Center(child: Text('Sélectionnez une conversation'))
+                      ? const Center(child: Text('Sélectionnez une conversation'))
                       : SingleChildScrollView(
                           controller: _scrollController,
                           child: Column(
                             children: selectedConversation!.messages
                                 .map((message) => Container(
-                                      padding: EdgeInsets.all(8),
+                                      padding: const EdgeInsets.all(8),
                                       alignment:
                                           message.author.id == pUser.getUser.id
                                               ? Alignment.centerRight
                                               : Alignment.centerLeft,
                                       child: Container(
-                                        padding: EdgeInsets.all(12),
+                                        padding: const EdgeInsets.all(12),
                                         decoration: BoxDecoration(
                                           color: message.author.id ==
                                                   pUser.getUser.id
@@ -229,14 +229,14 @@ class _ChatScreenState extends State<ChatScreen> {
                         Expanded(
                           child: TextField(
                             controller: _messageController,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               hintText: 'Écrivez votre message...',
                               border: OutlineInputBorder(),
                             ),
                           ),
                         ),
                         IconButton(
-                          icon: Icon(Icons.send),
+                          icon: const Icon(Icons.send),
                           onPressed: () {
                             if (_messageController.text.isNotEmpty) {
                               socket.emit('message', {
