@@ -1,6 +1,6 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'dart:math';
 
 // Modèle pour un filtre
 class Filter {
@@ -17,14 +17,14 @@ class Filter {
   });
 }
 
-class RandomBentoGrid extends StatefulWidget {
-  const RandomBentoGrid({super.key});
+class ProductScreen extends StatefulWidget {
+  const ProductScreen({super.key});
 
   @override
-  _RandomBentoGridState createState() => _RandomBentoGridState();
+  _ProductScreenState createState() => _ProductScreenState();
 }
 
-class _RandomBentoGridState extends State<RandomBentoGrid> {
+class _ProductScreenState extends State<ProductScreen> {
   final Random random = Random();
 
   // Liste complète des éléments
@@ -36,7 +36,11 @@ class _RandomBentoGridState extends State<RandomBentoGrid> {
   List<Filter> filters = [
     Filter(name: "Name contains 'a'", key: "userName"),
     Filter(name: "Brand: Supreme", key: "brand", value: "Supreme"),
-    Filter(name: "Price Range: 50-100", key: "price", value: {"min": 50, "max": 100}),
+    Filter(
+      name: "Price Range: 50-100",
+      key: "price",
+      value: {"min": 50.0, "max": 100.0},
+    ),
     Filter(name: "Condition: New", key: "condition", value: "Neuf"),
   ];
 
@@ -44,19 +48,22 @@ class _RandomBentoGridState extends State<RandomBentoGrid> {
   void initState() {
     super.initState();
     _generateItems();
-    visibleItems = List.from(items); // Initialisation
+    visibleItems = List.from(items); // Initialisation de la liste visible
   }
 
-  // Générer une liste de données avec des champs aléatoires
+  // Générer une liste d'items avec des valeurs aléatoires
   void _generateItems() {
     for (int i = 0; i < 50; i++) {
       items.add({
         "userName": _generateRandomString(8),
         "brand": i % 2 == 0 ? "Supreme" : "Nike",
-        "price": random.nextDouble() * 100 + 10,
+        "price": random.nextDouble() * 100 + 10, // Entre 10 et 110
         "sizeLabel": i % 2 == 0 ? "M" : "L",
         "condition": i % 3 == 0 ? "Neuf" : "Usé",
+        // Vous pouvez varier aussi le chemin d'image si vous en avez plusieurs
         "path": "assets/667logo.jpg",
+        // Pour varier la hauteur des cartes, nous ajoutons un "heightFactor"
+        "heightFactor": random.nextDouble() * 50 + 150, // Entre 150 et 200
       });
     }
   }
@@ -68,7 +75,7 @@ class _RandomBentoGridState extends State<RandomBentoGrid> {
         .join();
   }
 
-  // Méthode pour afficher le BottomSheet avec les filtres et la création
+  // Méthode pour afficher le BottomSheet avec les filtres et la création de catégorie
   void _showFilterAndCreateSheet(BuildContext context) {
     TextEditingController categoryController = TextEditingController();
 
@@ -156,7 +163,8 @@ class _RandomBentoGridState extends State<RandomBentoGrid> {
           }
           if (filter.key == "price") {
             final range = filter.value as Map<String, double>;
-            if (item["price"] < range["min"]! || item["price"] > range["max"]!) {
+            if (item["price"] < range["min"]! ||
+                item["price"] > range["max"]!) {
               return false;
             }
           }
@@ -172,16 +180,15 @@ class _RandomBentoGridState extends State<RandomBentoGrid> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-
-    final int crossAxisCount = screenWidth > 1200
-        ? 6
-        : (screenWidth > 800 ? 4 : 2);
+    final int crossAxisCount =
+        screenWidth > 1200 ? 6 : (screenWidth > 800 ? 4 : 2);
 
     return Scaffold(
+      /*
       appBar: AppBar(
         title: const Text("Searchable Grid with Filters"),
         centerTitle: true,
-      ),
+      ), */
       body: Column(
         children: [
           // Barre de recherche
@@ -192,7 +199,9 @@ class _RandomBentoGridState extends State<RandomBentoGrid> {
                 setState(() {
                   visibleItems = items
                       .where((item) =>
-                          item["userName"]?.toLowerCase().contains(query.toLowerCase()) ??
+                          item["userName"]
+                              ?.toLowerCase()
+                              .contains(query.toLowerCase()) ??
                           false)
                       .toList();
                 });
@@ -253,12 +262,21 @@ class _RandomBentoGridState extends State<RandomBentoGrid> {
       elevation: 6,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Image.asset(
-            item["path"],
-            fit: BoxFit.cover,
-            height: 150,
+          // Image
+          Container(
+            height: item["heightFactor"],
+            decoration: BoxDecoration(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(16)),
+              image: DecorationImage(
+                image: AssetImage(item["path"]),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
+          // Détails
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(

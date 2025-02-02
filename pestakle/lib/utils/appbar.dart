@@ -7,7 +7,7 @@ import 'package:pestakle/views/user_screen.dart';
 AppBar appBarAccount(widthScreen, context, String providerImage) {
   return AppBar(
     centerTitle: true,
-    backgroundColor: Colors.transparent,
+    //backgroundColor: Colors.transparent,
     elevation: 0,
     // Le leading est un menu burger qui ouvre le Drawer
     leading: Builder(

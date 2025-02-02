@@ -42,6 +42,7 @@ flutter:
   # Définir les assets (images, fichiers, etc.)
   assets:
     - assets/pestacle.jpg
+    - assets/scarlet.jpeg
 # Fonts customisées (décommenter et configurer si nécessaire)
 # fonts:
 #   - family: Schyler

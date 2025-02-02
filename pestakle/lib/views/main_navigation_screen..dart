@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pestakle/components/drawer.dart';
+import 'package:pestakle/views/conversation/conversationList_screen.dart';
+import 'package:pestakle/views/product/productlist_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:pestakle/controllers/provider/index_provider.dart';
 import 'package:pestakle/controllers/provider/user_provider.dart';
 import 'package:pestakle/utils/appbar.dart';
 import 'package:pestakle/utils/dialog_boxes.dart';
-import 'package:pestakle/views/chat_screen.dart';
-import 'package:pestakle/views/feed_screen.dart';
 
 class MainPage extends StatelessWidget {
   final List<Widget> screens = [
-    const FeedScreen(),
-    // Vous pouvez ajouter d'autres écrans si nécessaire, par exemple le ChatScreen
-    // const ChatScreen(),
+    const ProductScreen(),
+    const ConversationSelectionScreen(),
   ];
 
   MainPage({super.key});
@@ -51,9 +50,9 @@ class MainPage extends StatelessWidget {
       },
       child: Scaffold(
         // Utilisation de l'appBar personnalisée, ici en passant les couleurs du thème via la fonction appBarAccount si nécessaire
-        appBar: (currentScreenIndex == 0)
-            ? appBarAccount(widthScreen, context, pUser.getUser.profilePicture)
-            : null,
+        appBar:
+            appBarAccount(widthScreen, context, pUser.getUser.profilePicture),
+
         drawer: CustomDrawer(),
         bottomNavigationBar: BottomNavigationBar(
           selectedItemColor: theme

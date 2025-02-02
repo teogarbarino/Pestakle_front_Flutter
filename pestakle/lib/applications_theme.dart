@@ -23,7 +23,7 @@ class ApplicationTheme {
     scaffoldBackgroundColor: backgroundColor,
     appBarTheme: const AppBarTheme(
       backgroundColor: primaryColor,
-      foregroundColor: Colors.white,
+      foregroundColor: primaryColor,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(

@@ -84,7 +84,7 @@ class OnboardingPage extends StatelessWidget {
                               "Voulez-vous vraiment continuer sans vous inscrire ?"),
                         );
                         if (confirmed) {
-                          Navigator.pushNamed(context, '/home');
+                          Navigator.pushNamed(context, '/main');
                         }
                       },
                       child: const Text("S'inscrire plus tard"),
