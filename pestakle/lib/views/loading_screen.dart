@@ -4,23 +4,20 @@
 
 // Dart Imports
 // Flutter Imports
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // External Imports
 import 'package:http/http.dart';
+import 'package:pestakle/views/auth/on_boardscreen.dart';
 import 'package:provider/provider.dart';
-import 'package:pestakle/controllers/json_handler.dart';
 import 'package:pestakle/controllers/persistance_handler.dart';
 
 import 'package:pestakle/controllers/provider/user_provider.dart';
 import 'package:pestakle/controllers/service/https_service.dart';
 import 'package:pestakle/global/route.dart';
-import 'package:pestakle/models/user.dart';
 import 'package:pestakle/utils/dialog_boxes.dart';
-import 'package:pestakle/views/login_screen.dart';
-import 'package:pestakle/views/menu.dart';
+import 'package:pestakle/views/MainController.dart';
 
 class LoadingPage extends StatefulWidget {
   const LoadingPage({super.key});
@@ -94,6 +91,10 @@ class _LoadingPageState extends State<LoadingPage> {
   }
 
   passToOtherScreen() async {
+    if (context.mounted) {
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const OnboardingPage()));
+    }
     String refreshToken = await PersistanceHandler().getAccessToken();
     if (refreshToken != "notFound") {
       Response response =
@@ -105,19 +106,14 @@ class _LoadingPageState extends State<LoadingPage> {
         }
       }
     } else {
-      User resetedUser =
-          User(email: '', name: '', password: '', photo: '', id: "");
-
-      pUser.updateUser(resetedUser);
+      pUser.clearUser();
 
       PersistanceHandler().delAccessToken();
 
       // Renvoi au login
       if (context.mounted) {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const LoginPage(shouldGoMP: true)));
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const OnboardingPage()));
       }
     }
   }

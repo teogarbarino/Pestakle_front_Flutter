@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pestakle/controllers/provider/user_provider.dart';
 import 'package:pestakle/controllers/service/https_service.dart';
@@ -10,6 +10,8 @@ import 'package:pestakle/models/conversation.dart';
 import 'package:pestakle/models/user.dart';
 
 class ChatScreen extends StatefulWidget {
+  const ChatScreen({super.key});
+
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
@@ -150,7 +152,7 @@ class _ChatScreenState extends State<ChatScreen> {
       body: Row(
         children: [
           // Liste des conversations
-          Container(
+          SizedBox(
             width: 300,
             child: ListView.builder(
               itemCount: conversations.length,
@@ -184,7 +186,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 // Messages
                 Expanded(
                   child: selectedConversation == null
-                      ? const Center(child: Text('Sélectionnez une conversation'))
+                      ? const Center(
+                          child: Text('Sélectionnez une conversation'))
                       : SingleChildScrollView(
                           controller: _scrollController,
                           child: Column(
@@ -266,3 +269,4 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 }
+*/

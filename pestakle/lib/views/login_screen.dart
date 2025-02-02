@@ -9,18 +9,17 @@ import 'package:pestakle/views/test.dart';
 import 'package:provider/provider.dart';
 import 'package:pestakle/controllers/provider/index_provider.dart';
 import 'package:pestakle/controllers/provider/user_provider.dart';
-import 'package:pestakle/views/menu.dart';
-import 'package:pestakle/views/register_screen.dart';
+import 'package:pestakle/views/MainController.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginsPage extends StatefulWidget {
   final bool shouldGoMP;
-  const LoginPage({super.key, required this.shouldGoMP});
+  const LoginsPage({super.key, required this.shouldGoMP});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<LoginsPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginsPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool _obscureText = true;
@@ -163,7 +162,7 @@ class _LoginPageState extends State<LoginPage> {
                     height: 30,
                     child: ElevatedButton(
                       onPressed: () {
-                        if (widget.shouldGoMP == true) {
+                        /*if (widget.shouldGoMP == true) {
                           pIndex.updateScreenIndex(0);
                           Navigator.push(
                               context,
@@ -171,7 +170,7 @@ class _LoginPageState extends State<LoginPage> {
                                   builder: (context) => RegistrationPage()));
                         } else {
                           Navigator.pop(context);
-                        }
+                        } */
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black, // Background color

@@ -182,8 +182,8 @@ class _FeedScreenState extends State<FeedScreen> {
                           width: 10,
                         ),
                         CircleAvatar(
-                          backgroundImage:
-                              MemoryImage(base64Decode(message.author.photo!)),
+                          backgroundImage: MemoryImage(
+                              base64Decode(message.author.profilePicture)),
                           radius: 20,
                         ),
                         const SizedBox(width: 10),
@@ -191,7 +191,7 @@ class _FeedScreenState extends State<FeedScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              message.author.name,
+                              message.author.username,
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,

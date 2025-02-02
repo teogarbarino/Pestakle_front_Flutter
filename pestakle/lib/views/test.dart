@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:pestakle/components/dynamicCategorie.dart';
 import 'dart:math';
 
-import 'package:pestakle/views/details_screen.dart';
+// Modèle pour un filtre
+class Filter {
+  final String name; // Nom du filtre (par ex. "Brand")
+  final String key; // Clé associée au produit (par ex. "brand")
+  dynamic value; // Valeur du filtre
+  bool isActive; // Indique si le filtre est actif
 
-// Enum pour définir les filtres disponibles
-enum FilterType { userName, brand, priceRange, condition }
+  Filter({
+    required this.name,
+    required this.key,
+    this.value,
+    this.isActive = false,
+  });
+}
 
 class RandomBentoGrid extends StatefulWidget {
   const RandomBentoGrid({super.key});
@@ -23,13 +32,13 @@ class _RandomBentoGridState extends State<RandomBentoGrid> {
   // Liste visible (après application de filtres/recherche)
   List<Map<String, dynamic>> visibleItems = [];
 
-  // Map pour gérer l'état actif des filtres
-  Map<FilterType, bool> activeFilters = {
-    FilterType.userName: false,
-    FilterType.brand: false,
-    FilterType.priceRange: false,
-    FilterType.condition: false,
-  };
+  // Liste des filtres dynamiques
+  List<Filter> filters = [
+    Filter(name: "Name contains 'a'", key: "userName"),
+    Filter(name: "Brand: Supreme", key: "brand", value: "Supreme"),
+    Filter(name: "Price Range: 50-100", key: "price", value: {"min": 50, "max": 100}),
+    Filter(name: "Condition: New", key: "condition", value: "Neuf"),
+  ];
 
   @override
   void initState() {
@@ -59,42 +68,103 @@ class _RandomBentoGridState extends State<RandomBentoGrid> {
         .join();
   }
 
-  // Appliquer les filtres actifs
+  // Méthode pour afficher le BottomSheet avec les filtres et la création
+  void _showFilterAndCreateSheet(BuildContext context) {
+    TextEditingController categoryController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            top: 16.0,
+            left: 16.0,
+            right: 16.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Filtres & Création de Catégories",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8.0),
+              // Liste des filtres existants
+              Wrap(
+                spacing: 8.0,
+                children: filters.map((filter) {
+                  return FilterChip(
+                    label: Text(filter.name),
+                    selected: filter.isActive,
+                    onSelected: (selected) {
+                      setState(() {
+                        filter.isActive = selected;
+                        _applyFilters();
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 16.0),
+              // Champ pour ajouter une nouvelle catégorie
+              TextField(
+                controller: categoryController,
+                decoration: const InputDecoration(
+                  labelText: "Ajouter une catégorie",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              // Bouton pour ajouter la catégorie
+              ElevatedButton(
+                onPressed: () {
+                  String categoryName = categoryController.text.trim();
+                  if (categoryName.isNotEmpty) {
+                    setState(() {
+                      filters.add(Filter(name: categoryName, key: "custom"));
+                    });
+                    Navigator.pop(context); // Ferme le BottomSheet
+                  }
+                },
+                child: const Text("Ajouter"),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Méthode pour appliquer les filtres actifs
   void _applyFilters() {
     setState(() {
       visibleItems = items.where((item) {
-        if (activeFilters[FilterType.userName]! &&
-            !(item["userName"]?.toLowerCase().contains("a") ?? false)) {
-          return false;
+        for (var filter in filters) {
+          if (!filter.isActive) continue;
+
+          if (filter.key == "userName" &&
+              !(item[filter.key]?.toLowerCase().contains("a") ?? false)) {
+            return false;
+          }
+          if (filter.key == "brand" && item[filter.key] != filter.value) {
+            return false;
+          }
+          if (filter.key == "price") {
+            final range = filter.value as Map<String, double>;
+            if (item["price"] < range["min"]! || item["price"] > range["max"]!) {
+              return false;
+            }
+          }
+          if (filter.key == "condition" && item[filter.key] != filter.value) {
+            return false;
+          }
         }
-        if (activeFilters[FilterType.brand]! &&
-            item["brand"] != "Supreme") return false;
-        if (activeFilters[FilterType.priceRange]! &&
-            (item["price"] < 50 || item["price"] > 100)) return false;
-        if (activeFilters[FilterType.condition]! &&
-            item["condition"] != "Neuf") return false;
         return true;
-      }).toList();
-    });
-  }
-
-  // Basculer l'état d'un filtre
-  void _toggleFilter(FilterType filter) {
-    setState(() {
-      activeFilters[filter] = !activeFilters[filter]!;
-      _applyFilters();
-    });
-  }
-
-  // Filtrer les éléments en fonction de la recherche
-  void _filterItems(String query) {
-    setState(() {
-      visibleItems = items.where((item) {
-        final userNameMatch = item["userName"]
-                ?.toLowerCase()
-                .contains(query.toLowerCase()) ??
-            false;
-        return userNameMatch;
       }).toList();
     });
   }
@@ -117,9 +187,16 @@ class _RandomBentoGridState extends State<RandomBentoGrid> {
           // Barre de recherche
           Padding(
             padding: const EdgeInsets.all(8.0),
-            
             child: TextField(
-              onChanged: _filterItems, // Filtrer lors de la saisie
+              onChanged: (query) {
+                setState(() {
+                  visibleItems = items
+                      .where((item) =>
+                          item["userName"]?.toLowerCase().contains(query.toLowerCase()) ??
+                          false)
+                      .toList();
+                });
+              },
               decoration: InputDecoration(
                 hintText: 'Search by name...',
                 prefixIcon: const Icon(Icons.search),
@@ -129,38 +206,25 @@ class _RandomBentoGridState extends State<RandomBentoGrid> {
               ),
             ),
           ),
-          // Filtres dynamiques
-         Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-  child: SizedBox(
-    height: 100, // Hauteur pour les catégories dynamiques
-    child: DynamicCategories(
-     onCategoriesChanged: (filters) {
-  setState(() {
-    visibleItems = items.where((item) {
-      if ((filters[FilterType.userName.index] ?? false) &&
-          !(item["userName"]?.contains('a') ?? false)) {
-        return false;
-      }
-      if ((filters[FilterType.brand.index] ?? false) &&
-          item["brand"] != "Supreme") {
-        return false;
-      }
-      if ((filters[FilterType.priceRange.index] ?? false) &&
-          (item["price"] < 50 || item["price"] > 100)) {
-        return false;
-      }
-      if ((filters[FilterType.condition.index] ?? false) &&
-          item["condition"] != "Neuf") {
-        return false;
-      }
-      return true;
-    }).toList();
-  });
-},
-    ),
-  ),
-),
+          // Liste des filtres
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Wrap(
+              spacing: 8.0,
+              children: filters.map((filter) {
+                return FilterChip(
+                  label: Text(filter.name),
+                  selected: filter.isActive,
+                  onSelected: (selected) {
+                    setState(() {
+                      filter.isActive = selected;
+                      _applyFilters();
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+          ),
           // Grille des éléments
           Expanded(
             child: MasonryGridView.count(
@@ -170,49 +234,16 @@ class _RandomBentoGridState extends State<RandomBentoGrid> {
               itemCount: visibleItems.length,
               itemBuilder: (context, index) {
                 final item = visibleItems[index];
-                return GestureDetector(onTap: () {
-    // Navigue vers la page de détail
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DetailPage(item: item),
-      ),
-    );
-  },
-  onLongPress: (){
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Image.asset(
-            item["path"],
-            fit: BoxFit.contain,
-          ),
-        ),
-      ),
-    );
-  },
-                  child: _buildItemCard(item));
+                return _buildItemCard(item);
               },
             ),
           ),
         ],
       ),
-    );
-  }
-
-  // Widget pour afficher les filtres sous forme de chips
-  Widget _buildFilterChip(FilterType filter, String label) {
-    return ChoiceChip(
-      label: Text(label),
-      selected: activeFilters[filter]!,
-      onSelected: (_) => _toggleFilter(filter),
-      selectedColor: Colors.blue,
-      backgroundColor: Colors.grey[200],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showFilterAndCreateSheet(context),
+        child: const Icon(Icons.filter_list),
+      ),
     );
   }
 

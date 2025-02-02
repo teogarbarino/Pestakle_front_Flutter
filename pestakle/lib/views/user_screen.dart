@@ -13,6 +13,8 @@ import 'package:pestakle/models/user.dart';
 import 'package:pestakle/utils/dialog_boxes.dart';
 
 class userpage extends StatefulWidget {
+  const userpage({super.key});
+
   @override
   userpageState createState() => userpageState();
 }
@@ -33,8 +35,8 @@ class userpageState extends State<userpage> {
   }
 
   Future<void> _pickImage() async {
-    final ImagePicker _picker = ImagePicker();
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
       setState(() {
@@ -78,8 +80,8 @@ class userpageState extends State<userpage> {
                             : GestureDetector(
                                 onTap: _pickImage,
                                 child: CircleAvatar(
-                                  backgroundImage: MemoryImage(
-                                      base64Decode(pUser.getUser.photo!)),
+                                  backgroundImage: MemoryImage(base64Decode(
+                                      pUser.getUser.profilePicture!)),
                                 ),
                               ),
                       ],
@@ -114,8 +116,8 @@ class userpageState extends State<userpage> {
   void getData() async {
     user = pUser.getUser;
 
-    nameController.text = user.name;
-    img = user.photo;
+    nameController.text = user.username;
+    img = user.profilePicture;
 
     setState(() {
       dataready = true;

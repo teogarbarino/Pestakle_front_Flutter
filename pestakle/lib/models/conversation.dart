@@ -1,4 +1,4 @@
-import 'package:pestakle/models/post.dart';
+/*import 'package:pestakle/models/post.dart';
 import 'package:pestakle/models/user.dart';
 
 class Conversation {
@@ -53,3 +53,4 @@ class Conversation {
     return participants.any((participant) => participant.id == user.id);
   }
 }
+*/

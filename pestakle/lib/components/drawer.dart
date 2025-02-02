@@ -5,11 +5,15 @@ class CustomDrawer extends StatelessWidget {
   final List<Map<String, dynamic>> menuItems = [
     {"icon": Icons.home, "label": "Home", "route": "/home"},
     {"icon": Icons.person, "label": "Profile", "route": "/profile"},
+    {"icon": Icons.favorite, "label": "Favorites", "route": "/favorites"},
+    {"icon": Icons.list_alt, "label": "Wishlist", "route": "/wishlist"},
+    {"icon": Icons.history, "label": "Transactions", "route": "/transactions"},
     {"icon": Icons.settings, "label": "Settings", "route": "/settings"},
+    {"icon": Icons.help, "label": "FAQ", "route": "/faq"},
     {"icon": Icons.info, "label": "About", "route": "/about"},
   ];
 
-   CustomDrawer({super.key});
+  CustomDrawer({super.key});
 
   // Fonction pour naviguer vers une route
   void _navigateTo(BuildContext context, String route) {
@@ -60,7 +64,8 @@ class CustomDrawer extends StatelessWidget {
                   title: Text(item["label"]),
                   onTap: () {
                     Navigator.pop(context); // Ferme le Drawer
-                    _navigateTo(context, item["route"]); // Navigue vers la route
+                    _navigateTo(
+                        context, item["route"]); // Navigue vers la route
                   },
                 );
               },
@@ -75,7 +80,7 @@ class CustomDrawer extends StatelessWidget {
             ),
             onTap: () {
               Navigator.pop(context);
-              // Logique pour déconnecter l'utilisateur
+              // Ajoutez ici la logique pour déconnecter l'utilisateur
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text("Logged out successfully")),
               );

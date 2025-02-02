@@ -1,51 +1,75 @@
-import 'dart:convert';
-
 class User {
-  final String name;
+  final String username;
   final String email;
-  final String password;
-  String? photo;
-  final List<String>? posts;
-  final List<String>? feed;
-  final String id;
+  final String address;
+  final String bio;
+  final String profilePicture; // Encodé en base64
+  final String role;
+  final double trustIndex;
+  final UserSettings userSettings;
 
   User({
-    required this.name,
+    required this.username,
     required this.email,
-    required this.password,
-    this.photo,
-    this.posts,
-    this.feed,
-    required this.id,
+    required this.address,
+    required this.bio,
+    required this.profilePicture,
+    required this.role,
+    required this.trustIndex,
+    required this.userSettings,
   });
 
-  // Factory constructor to create a User from a JSON object
+  // Conversion JSON -> Objet
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'] as String,
-      name: json['name'] ?? '',
-      email: json['email'] ?? '',
-      password: json['password'] ?? '',
-      photo: json['photo'] as String?,
-      posts: List<String>.from(json['posts'] ?? []),
-      feed: List<String>.from(json['feed'] ?? []),
+      username: json['username'] as String,
+      email: json['email'] as String,
+      address: json['address'] as String,
+      bio: json['bio'] as String,
+      profilePicture: json['profilePicture'] as String,
+      role: json['role'] as String,
+      trustIndex: (json['trustIndex'] as num).toDouble(),
+      userSettings: UserSettings.fromJson(json['userSettings']),
     );
   }
 
-  // Method to convert a User instance to a JSON object
+  // Conversion Objet -> JSON
   Map<String, dynamic> toJson() {
     return {
-      'name': name,
+      'username': username,
       'email': email,
-      'password': password,
-      'photo': photo,
-      'posts': posts,
-      'feed': feed,
+      'address': address,
+      'bio': bio,
+      'profilePicture': profilePicture,
+      'role': role,
+      'trustIndex': trustIndex,
+      'userSettings': userSettings.toJson(),
     };
   }
+}
 
-  @override
-  String toString() {
-    return jsonEncode(toJson());
+class UserSettings {
+  final String theme; // 'light' ou 'dark'
+  final double fontSize;
+
+  UserSettings({
+    required this.theme,
+    required this.fontSize,
+  });
+
+  // Conversion JSON -> Objet
+  factory UserSettings.fromJson(Map<String, dynamic> json) {
+    return UserSettings(
+      theme: json['theme'] as String,
+      fontSize: (json['fontSize'] as num).toDouble(),
+    );
+  }
+
+  // Conversion Objet -> JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'theme': theme,
+      'fontSize': fontSize,
+    };
   }
 }

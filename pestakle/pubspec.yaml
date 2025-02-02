@@ -25,6 +25,7 @@ dependencies:
   shared_preferences: ^2.2.1 # Stockage persistant local
   http: ^1.1.0 # Requêtes HTTP
   flutter_staggered_grid_view: ^0.7.0
+  multi_select_flutter: ^4.1.3
 
 dev_dependencies:
   flutter_test:
@@ -33,20 +34,14 @@ dev_dependencies:
   # Recommandations pour de bonnes pratiques de code
   flutter_lints: ^3.0.0
 
+
 # Section spécifique à Flutter
 flutter:
   uses-material-design: true
 
   # Définir les assets (images, fichiers, etc.)
   assets:
-    - assets/667.webp # Chemin d'accès à votre fichier image (assurez-vous que ce fichier existe)
-    - assets/wwow.gif
-    - assets/zuukou-667.gif
-    - assets/667logo.jpg
-    - assets/drake.jpeg
-    - assets/kendrick.jpeg
-    - assets/scarlet.jpeg
-    - assets/pub.gif
+    - assets/pestacle.jpg
 # Fonts customisées (décommenter et configurer si nécessaire)
 # fonts:
 #   - family: Schyler
